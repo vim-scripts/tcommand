@@ -1,0 +1,9 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=3013
+
+VIM plugins are cool but with time you forget about even useful 
+commands. This plugin provides a command (|:TCommand|) that lets you 
+select a command or menu item from a list (you can optionally display 
+help on the currently hightlighted command) and then run it from the 
+command line. It thus provides an alternative to the built-in 
+command-line completion.
+
