@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2010-03-12.
-" @Last Change: 2010-08-10.
-" @Revision:    259
+" @Last Change: 2012-02-07.
+" @Revision:    292
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -67,20 +67,27 @@ function! tcommand#Select(reset, filter) "{{{3
         for [what, def] in items(g:tcommand#what)
             call call(def.collect, [what, def, s:commands])
         endfor
+        " echom "DBG tcommand#Select" string(s:commands)
         if !empty(g:tcommand#hide_rx)
             call filter(s:commands, 'v:val !~ g:tcommand#hide_rx')
         endif
     endif
     let w.base = s:commands
+    " TLogVAR len(w.base)
     let v = winsaveview()
+    let wrc = winrestcmd()
+    let winnr = winnr()
     let help = 0
     windo if &ft == 'help' | let help = 1 | endif
+    exec winnr 'wincmd w'
     try
         let item = tlib#input#ListD(w)
     finally
         if !help
             silent! windo if &ft == 'help' | exec 'wincmd c' | endif
+            exec winnr 'wincmd w'
         endif
+        exec wrc
         call winrestview(v)
         redraw
     endtry
@@ -102,7 +109,7 @@ function! tcommand#Info(world, selected) "{{{3
     " TLogVAR a:selected
     let bufnr = bufnr('%')
     try
-        let [item, type, modifier, nargs] = split(a:selected[0], '\t')
+        let [item, comment, type, modifier, nargs] = split(a:selected[0], '\t')
         if type ==# 'C' && !empty(item)
             let vert = get(g:tcommand#world, 'scratch_vertical', 0) || winwidth(0) < 140 ? 'above' : 'vert'
             exec vert .' help '. item
@@ -123,16 +130,13 @@ function! s:CollectCommands(type, def, acc) "{{{3
     let commands0 = tlib#cmd#OutputAsList('verbose command')
     let ncommands0 = len(commands0)
     let commands = []
-    for i in range(1, ncommands0 / 2 - 1, 2)
+    for i in range(1, ncommands0 - 1, 2)
         let cmd0 = commands0[i]
         let src  = substitute(commands0[i + 1], '^\s\+', '', '')
         let cmd  = s:FormatCommand(a:type, cmd0, src)
         " TLogVAR i, cmd0, src, cmd
         call add(commands, cmd)
     endfor
-    " let commands = tlib#cmd#OutputAsList('command')
-    " call remove(commands, 0)
-    " call map(commands, 's:FormatCommand(a:type, v:val)')
     call extend(a:acc, commands)
 endf
 
@@ -167,9 +171,12 @@ function! s:FormatItem(item, comment, type, modifier, nargs) "{{{3
     let width = get(g:tcommand#world, 'scratch_vertical', 0) ? 30 : (winwidth(0) - 4)
     let item = a:item
     if !empty(a:comment)
-        let item .= "\t(". a:comment .")"
+        " TLogVAR a:comment
+        let thecomment = "(". a:comment .")"
+    else
+        let thecomment = " "
     endif
-    return printf("%-". width ."s\t%s\t%s\t%s", item, a:type, a:modifier, a:nargs)
+    return printf("%-". width ."s\t%s\t%s\t%s\t%s", item, thecomment, a:type, a:modifier, a:nargs)
 endf
 
 

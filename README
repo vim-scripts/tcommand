@@ -1,5 +1,7 @@
 This is a mirror of http://www.vim.org/scripts/script.php?script_id=3013
 
+Also available via git: http://github.com/tomtom/tcommand_vim
+
 VIM plugins are cool but with time you forget about even useful 
 commands. This plugin provides a command (|:TCommand|) that lets you 
 select a command or menu item from a list (you can optionally display 
